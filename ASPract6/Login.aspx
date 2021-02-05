@@ -32,13 +32,13 @@
                 <tr>
                     <td class="auto-style2">Password</td>
                     <td>
-                        <asp:TextBox ID="tb_pwd" runat="server" Width="221px"></asp:TextBox>
-                    </td>
+                        <asp:TextBox ID="tb_pwd" runat="server" Width="221px" TextMode="Password"></asp:TextBox>
+                    &nbsp;</td>
                 </tr>
                 <tr>
                     <td class="auto-style2">&nbsp;</td>
                     <td>
-                        <asp:Button ID="btn_Submit" runat="server" Height="35px" OnClick="btn_Submit_Click" Text="Submit" Width="236px" />
+                        <asp:Button ID="btn_Submit" runat="server" Height="35px" OnClick="btn_Submit_Click" Text="Submit" Width="227px" />
                     </td>
                 </tr>
             </table>
@@ -48,7 +48,10 @@
             <br />
             <asp:Label ID="lbl_errorXSS" runat="server"></asp:Label>
             <br />
-            <asp:Label ID="lbl_gScore" runat="server"></asp:Label>
+            <asp:Button ID="btn_Recover" runat="server" EnableViewState="False" Height="36px" OnClick="btn_Recover_Click" Text="Recover Account" Visible="False" Width="134px" />
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <asp:Button ID="btn_ChangePassword" runat="server" EnableViewState="False" Height="36px" Text="Change Password" Visible="False" Width="134px" OnClick="btn_ChangePassword_Click" />
+            <br />
         </div>
             </fieldset>
     </form>

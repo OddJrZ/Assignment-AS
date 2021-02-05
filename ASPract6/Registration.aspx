@@ -5,6 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title>Registration</title>
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lcsx0IaAAAAAJNoOIkh1UVR3nEMUZl5HzZSQ6Is"></script>
 
         <script type="text/javascript">
         function validate() {
@@ -126,7 +127,7 @@
                 <tr>
                     <td class="auto-style5">Password</td>
                     <td class="auto-style6">
-                        <asp:TextBox ID="tb_pwd" runat="server" Width="246px" onkeyup="javascript:validate()"></asp:TextBox>
+                        <asp:TextBox ID="tb_pwd" runat="server" Width="246px" onkeyup="javascript:validate()" TextMode="Password"></asp:TextBox>
                         <asp:RequiredFieldValidator ID="RequiredFieldValidatorPassword" runat="server"
                 ErrorMessage="Password is required" ForeColor="Red" ControlToValidate="tb_pwd" Display="Dynamic"></asp:RequiredFieldValidator>
                     &nbsp;<asp:Label ID="lbl_pwdchecker" runat="server"></asp:Label>
@@ -135,7 +136,7 @@
                 <tr>
                     <td class="auto-style3">Confirm Password</td>
                     <td class="auto-style4">
-                        <asp:TextBox ID="tb_cfmpwd" runat="server" Width="246px" onkeyup="javascript:validateCfmPass()"></asp:TextBox>
+                        <asp:TextBox ID="tb_cfmpwd" runat="server" Width="246px" onkeyup="javascript:validateCfmPass()" TextMode="Password"></asp:TextBox>
                         <asp:Label ID="lbl_cfmpwdchecker" runat="server"></asp:Label>
                     </td>
                 </tr>
@@ -170,10 +171,18 @@
                     </td>
                 </tr>
             </table>
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response"/>
             <br />
-            <asp:Label ID="lb_error1" runat="server"></asp:Label>
+            <asp:Label ID="lbl_error1" runat="server" ForeColor="Red"></asp:Label>
                 </fieldset>
         </div>
     </form>
+        <script>
+            grecaptcha.ready(function () {
+                grecaptcha.execute('6Lcsx0IaAAAAAJNoOIkh1UVR3nEMUZl5HzZSQ6Is', { action: 'Login' }).then(function (token) {
+                    document.getElementById("g-recaptcha-response").value = token;
+                });
+            });
+        </script>
 </body>
 </html>

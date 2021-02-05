@@ -44,8 +44,6 @@ namespace ASPract6
                     {
                         string jsonResponse = readStream.ReadToEnd();
 
-                        lbl_gScore.Text = jsonResponse.ToString();
-
                         JavaScriptSerializer js = new JavaScriptSerializer();
 
                         MyObject jsonObject = js.Deserialize<MyObject>(jsonResponse);
@@ -91,7 +89,16 @@ namespace ASPract6
 
                                 Response.Cookies.Add(new HttpCookie("AuthToken", guid));
 
-                                Response.Redirect("Success.aspx", false);
+                                DateTime CurrentPasswordAge = Convert.ToDateTime(getPasswordAge(userid));
+                                DateTime MaxPasswordAge = CurrentPasswordAge.AddMinutes(15);
+                                if (DateTime.Now > MaxPasswordAge)
+                                {
+                                    Response.Redirect("RecoverPassword.aspx?Email=" + HttpUtility.UrlEncode(tb_email.Text), false);
+                                }
+                                else
+                                {
+                                    Response.Redirect("Success.aspx", false);
+                                }
                             }
                             else
                             {
@@ -102,7 +109,9 @@ namespace ASPract6
                         }
                         else
                         {
-                            lbl_errorMsg.Text = "Your account is currently locked. Please reset your password to unlock!";
+                            btn_Recover.Visible = true;
+                            btn_ChangePassword.Visible = true;
+                            lbl_errorMsg.Text = "Your account is currently locked. Recover Account to unlock or change password!";
                         }
 
                     }
@@ -122,6 +131,40 @@ namespace ASPract6
 
             }
         }
+        protected string getPasswordAge(string userid)
+        {
+            string h = null;
+            SqlConnection connection = new SqlConnection(MYDBConnectionString);
+            string sql = "select PasswordTimeUpdate FROM Account WHERE Email=@USERID";
+            SqlCommand command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@USERID", userid);
+            try
+            {
+                connection.Open();
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+
+                    while (reader.Read())
+                    {
+                        if (reader["PasswordTimeUpdate"] != null)
+                        {
+                            if (reader["PasswordTimeUpdate"] != DBNull.Value)
+                            {
+                                h = reader["PasswordTimeUpdate"].ToString();
+                            }
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+            finally { connection.Close(); }
+            return h;
+        }
+
         protected void increasePassStatus(string userid, int passStatus)
         {
             SqlConnection connection = new SqlConnection(MYDBConnectionString);
@@ -174,6 +217,25 @@ namespace ASPract6
             }
             finally { connection.Close(); }
             return pass;
+        }
+
+        protected void resetPassStatus(string userid)
+        {
+            SqlConnection connection = new SqlConnection(MYDBConnectionString);
+            string sql = "UPDATE Account SET Status = @passStatus WHERE Email=@USERID";
+            SqlCommand command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@USERID", userid);
+            command.Parameters.AddWithValue("@passStatus", 0);
+            try
+            {
+                connection.Open();
+                command.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+            finally { connection.Close(); }
         }
 
         protected string getDBHash(string userid)
@@ -242,6 +304,20 @@ namespace ASPract6
             return s;
         }
 
+        //unlock account to allow user to try again
+        protected void btn_Recover_Click(object sender, EventArgs e)
+        {
+            string userid = tb_email.Text.ToString().Trim();
+            resetPassStatus(userid);
+            btn_Recover.Visible = false;
+            btn_ChangePassword.Visible = false;
+            lbl_errorMsg.Text = "Your account has been unlocked! Please try again!";
+        }
 
+        //change account password + unlock
+        protected void btn_ChangePassword_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("RecoverPassword.aspx?Email=" + HttpUtility.UrlEncode(tb_email.Text));
+        }
     }
 }

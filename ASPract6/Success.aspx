@@ -13,15 +13,29 @@
         <div>
             <br />
             <br />
-            User ID:
+            Email:
             <asp:Label ID="lbl_userID" runat="server" Text="test1"></asp:Label>
             <br />
             <br />
-            NRIC:
-            <asp:Label ID="lbl_nric" runat="server" Text="test2"></asp:Label>
+            Name:
+            <asp:Label ID="lbl_name" runat="server" Text="test2"></asp:Label>
             <br />
             <br />
-            <asp:Button ID="btn_Logout" runat="server" Text="Logout" OnClick="LogoutMe" Visible="false"/>
+            Minimum Password Age: <asp:Label ID="lbl_MinAge" runat="server"></asp:Label>
+            <br />
+            <asp:Button ID="btn_CheckMin" runat="server" OnClick="btn_CheckMin_Click" Text="Check" Width="147px" />
+            <br />
+            <br />
+            Maximum Password Age:
+            <asp:Label ID="lbl_MaxAge" runat="server"></asp:Label>
+            <br />
+            <asp:Button ID="btn_CheckMax" runat="server" OnClick="btn_CheckMax_Click" Text="Check" Width="150px" />
+            <br />
+            <br />
+            <br />
+            <asp:Button ID="btn_Logout" runat="server" Text="Logout" OnClick="LogoutMe" Visible="false" Width="148px"/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <asp:Button ID="btn_changePass" runat="server" OnClick="btn_changePass_Click" Text="Change Password" Visible="False" />
         </div>
             </fieldset>
     </form>

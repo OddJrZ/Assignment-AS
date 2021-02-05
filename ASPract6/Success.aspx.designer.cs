@@ -33,13 +33,49 @@ namespace ASPract6
         protected global::System.Web.UI.WebControls.Label lbl_userID;
 
         /// <summary>
-        /// lbl_nric control.
+        /// lbl_name control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbl_nric;
+        protected global::System.Web.UI.WebControls.Label lbl_name;
+
+        /// <summary>
+        /// lbl_MinAge control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbl_MinAge;
+
+        /// <summary>
+        /// btn_CheckMin control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btn_CheckMin;
+
+        /// <summary>
+        /// lbl_MaxAge control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbl_MaxAge;
+
+        /// <summary>
+        /// btn_CheckMax control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btn_CheckMax;
 
         /// <summary>
         /// btn_Logout control.
@@ -49,5 +85,14 @@ namespace ASPract6
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btn_Logout;
+
+        /// <summary>
+        /// btn_changePass control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btn_changePass;
     }
 }

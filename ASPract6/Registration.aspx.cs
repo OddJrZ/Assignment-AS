@@ -8,6 +8,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
+using System.Net;
+using System.IO;
+using System.Web.Script.Serialization;
 
 namespace ASPract6
 {
@@ -18,6 +22,84 @@ namespace ASPract6
         static string salt;
         byte[] Key;
         byte[] IV;
+        public class MyObject
+        {
+            public string success { get; set; }
+            public List<string> ErrorMessage { get; set; }
+        }
+
+        public bool ValidateCaptcha()
+        {
+            bool result = true;
+
+            string captchaResponse = Request.Form["g-recaptcha-response"];
+
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create("https://www.google.com/recaptcha/api/siteverify?secret=6Lcsx0IaAAAAANi4ux_jNCei8ZGubr7gyBJE9JQa &response=" + captchaResponse);
+
+            try
+            {
+                using (WebResponse wResponse = req.GetResponse())
+                {
+                    using (StreamReader readStream = new StreamReader(wResponse.GetResponseStream()))
+                    {
+                        string jsonResponse = readStream.ReadToEnd();
+
+                        JavaScriptSerializer js = new JavaScriptSerializer();
+
+                        MyObject jsonObject = js.Deserialize<MyObject>(jsonResponse);
+
+                        result = Convert.ToBoolean(jsonObject.success);
+                    }
+                }
+
+                return result;
+            }
+            catch (WebException ex)
+            {
+                throw ex;
+            }
+        }
+
+        private int checkPassword(string password)
+        {
+            int score = 0;
+
+            //Score 1 Very weak
+            if (password.Length < 8)
+            {
+                return 1;
+            }
+            else
+            {
+                score = 1;
+            }
+
+            //Score 2 Weak
+            if (Regex.IsMatch(password, "[a-z]"))
+            {
+                score++;
+            }
+
+            //Score 3 Medium
+            if (Regex.IsMatch(password, "[A-Z]"))
+            {
+                score++;
+            }
+
+            //Score 4 Strong
+            if (Regex.IsMatch(password, "[0-9]"))
+            {
+                score++;
+            }
+
+            //Score 5 Excellent
+            if (Regex.IsMatch(password, @"[\W]{1,}"))
+            {
+                score++;
+            }
+
+            return score;
+        }
 
         protected byte[] encryptData(string data)
         {
@@ -61,7 +143,7 @@ namespace ASPract6
                             cmd.Parameters.AddWithValue("@PasswordHash", finalHash);
                             cmd.Parameters.AddWithValue("@PasswordSalt", salt);
                             cmd.Parameters.AddWithValue("@DateTimeRegistered", DateTime.Now);
-                            cmd.Parameters.AddWithValue("@PasswordTimeUpdate", DBNull.Value);
+                            cmd.Parameters.AddWithValue("@PasswordTimeUpdate", DateTime.Now);
                             cmd.Parameters.AddWithValue("@Status", 0);
                             cmd.Parameters.AddWithValue("@IV", Convert.ToBase64String(IV));
                             cmd.Parameters.AddWithValue("@Key", Convert.ToBase64String(Key));
@@ -75,7 +157,7 @@ namespace ASPract6
                             }
                             catch (Exception ex)
                             {
-                                lb_error1.Text = ex.ToString();
+                                lbl_error1.Text = ex.ToString();
                                 throw;
                             }
                             finally
@@ -100,31 +182,44 @@ namespace ASPract6
 
         protected void btn_Submit_Click(object sender, EventArgs e)
         {
-            string pwd = tb_pwd.Text.ToString().Trim(); 
+            if (ValidateCaptcha())
+            {
+                string pwd = tb_pwd.Text.ToString().Trim();
+                string cfmpwd = tb_cfmpwd.Text.ToString().Trim();
+                int scores = checkPassword(pwd);
+                if (scores != 5 || pwd != cfmpwd)
+                {
+                    lbl_error1.Text = "Please make sure you filled in correctly.";
+                }
+                else
+                {
 
-            //Generate random "salt"
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-            byte[] saltByte = new byte[8];
-            
-            //Fills array of bytes with a cryptographically strong sequence of random values.
-            rng.GetBytes(saltByte);
-            salt = Convert.ToBase64String(saltByte);
+                    //Generate random "salt"
+                    RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+                    byte[] saltByte = new byte[8];
 
-            SHA512Managed hashing = new SHA512Managed();
+                    //Fills array of bytes with a cryptographically strong sequence of random values.
+                    rng.GetBytes(saltByte);
+                    salt = Convert.ToBase64String(saltByte);
 
-            string pwdWithSalt = pwd + salt;
-            byte[] plainHash = hashing.ComputeHash(Encoding.UTF8.GetBytes(pwd));
-            byte[] hashWithSalt = hashing.ComputeHash(Encoding.UTF8.GetBytes(pwdWithSalt));
-            
-            finalHash = Convert.ToBase64String(hashWithSalt);
+                    SHA512Managed hashing = new SHA512Managed();
+
+                    string pwdWithSalt = pwd + salt;
+                    byte[] plainHash = hashing.ComputeHash(Encoding.UTF8.GetBytes(pwd));
+                    byte[] hashWithSalt = hashing.ComputeHash(Encoding.UTF8.GetBytes(pwdWithSalt));
+
+                    finalHash = Convert.ToBase64String(hashWithSalt);
 
 
-            RijndaelManaged cipher = new RijndaelManaged();
-            cipher.GenerateKey();
-            Key = cipher.Key;
-            IV = cipher.IV;
+                    RijndaelManaged cipher = new RijndaelManaged();
+                    cipher.GenerateKey();
+                    Key = cipher.Key;
+                    IV = cipher.IV;
 
-            createAccount();
+                    createAccount();
+                    Response.Redirect("Login.aspx", false);
+                }
+            }
 
         }
     }

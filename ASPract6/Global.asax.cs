@@ -9,6 +9,10 @@ namespace ASPract6
 {
     public class Global : System.Web.HttpApplication
     {
+        protected void Application_BeginRequest(object sender, EventArgs e)
+        {
+            HttpContext.Current.Response.AddHeader("X-Frame-Options", "DENY");
+        }
         protected void Application_Start(object sender, EventArgs e)
         {
         }

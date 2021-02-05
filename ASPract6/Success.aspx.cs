@@ -54,6 +54,8 @@ namespace ASPract6
 
         protected void displayUserProfile(string userid)
         {
+            string FirstName = null;
+            string LastName = null;
             SqlConnection connection = new SqlConnection(MYDBConnectionString);
             string sql = "SELECT * FROM Account WHERE Email=@userId";
             SqlCommand command = new SqlCommand(sql, connection);
@@ -72,7 +74,12 @@ namespace ASPract6
 
                         if (reader["FirstName"] != DBNull.Value)
                         {
-                            lbl_nric.Text = reader["FirstName"].ToString();
+                            FirstName = reader["FirstName"].ToString();
+                        }
+
+                        if (reader["LastName"] != DBNull.Value)
+                        {
+                            LastName = reader["LastName"].ToString();
                         }
 
                         if (reader["IV"] != DBNull.Value)
@@ -85,6 +92,7 @@ namespace ASPract6
                             Key = Convert.FromBase64String(reader["Key"].ToString());
                         }
                     }
+                    lbl_name.Text = FirstName + LastName;
                 }
             }//try
             catch (Exception ex)
@@ -120,6 +128,18 @@ namespace ASPract6
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (IsPostBack)
+            {
+                if (Session["UserID"] == null)
+                    Response.Redirect("Login.aspx", false);
+                else
+                {
+                    Response.ClearHeaders();
+                    Response.AddHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
+                    Response.AddHeader("Pragma", "no-cache");
+                }
+
+            }
             if (Session["UserID"] != null && Session["AuthToken"] != null && Request.Cookies["AuthToken"] != null)
             {
                 if (!Session["AuthToken"].ToString().Equals(Request.Cookies["AuthToken"].Value))
@@ -158,6 +178,80 @@ namespace ASPract6
                 throw new Exception(ex.ToString());
             }
             finally { connection.Close(); }
+        }
+
+        protected string getPasswordAge(string userid)
+        {
+            string h = null;
+            SqlConnection connection = new SqlConnection(MYDBConnectionString);
+            string sql = "select PasswordTimeUpdate FROM Account WHERE Email=@USERID";
+            SqlCommand command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@USERID", userid);
+            try
+            {
+                connection.Open();
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+
+                    while (reader.Read())
+                    {
+                        if (reader["PasswordTimeUpdate"] != null)
+                        {
+                            if (reader["PasswordTimeUpdate"] != DBNull.Value)
+                            {
+                                h = reader["PasswordTimeUpdate"].ToString();
+                            }
+                        }
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+            finally { connection.Close(); }
+            return h;
+        }
+
+        protected void btn_CheckMin_Click(object sender, EventArgs e)
+        {
+            DateTime CurrentPasswordAge = Convert.ToDateTime(getPasswordAge(lbl_userID.Text));
+            DateTime MinPasswordAge = CurrentPasswordAge.AddMinutes(5);
+            if (DateTime.Now > MinPasswordAge)
+            {
+                lbl_MinAge.Text = "You can change your password";
+                lbl_MinAge.ForeColor = System.Drawing.Color.Blue;
+                btn_changePass.Visible = true;
+            }
+            else
+            {
+                lbl_MinAge.Text = "You cannot change your password yet";
+                lbl_MinAge.ForeColor = System.Drawing.Color.Red;
+                btn_changePass.Visible = false;
+            }
+
+        }
+
+        protected void btn_CheckMax_Click(object sender, EventArgs e)
+        {
+            DateTime CurrentPasswordAge = Convert.ToDateTime(getPasswordAge(lbl_userID.Text));
+            DateTime MaxPasswordAge = CurrentPasswordAge.AddMinutes(15);
+            if (DateTime.Now < MaxPasswordAge)
+            {
+                lbl_MaxAge.Text = "Your password has yet to expire";
+                lbl_MaxAge.ForeColor = System.Drawing.Color.Blue;
+            }
+            else
+            {
+                lbl_MaxAge.Text = "Your password has expired";
+                lbl_MaxAge.ForeColor = System.Drawing.Color.Red;
+            }
+        }
+
+        protected void btn_changePass_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("RecoverPassword.aspx?Email=" + HttpUtility.UrlEncode(lbl_userID.Text));
         }
     }
 }
